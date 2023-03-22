@@ -1,0 +1,27 @@
+public with sharing class AccountTriggerHandler {
+	
+    public static void updateOpportunitiesWithPhone(Map<Id, Account> newMap, Map<Id, Account> oldMap)
+    {
+    	List<Id> relevantAccIDs = new List<Id>();
+        
+        for(Account acc: newMap.values())
+        {
+            if(newMap.get(acc.Id).Phone != NULL && newMap.get(acc.Id).Phone != oldMap.get(acc.Id).Phone)
+            {
+                relevantAccIDs.add(acc.Id);
+            }
+        }
+        
+        //get opportunities related to account and update phone number with respect to account phone
+        List<Opportunity> oppList = new List<Opportunity>();
+        for(Opportunity opp:[select id, name, phone__c, AccountID from Opportunity where AccountID IN :relevantAccIDs]){
+            opp.Phone__c = newMap.get(opp.AccountID).Phone;
+         	oppList.add(opp);
+        }
+        
+        if(oppList != NULL){
+            update oppList;
+        }
+    }
+        
+}
